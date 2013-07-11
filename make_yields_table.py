@@ -33,7 +33,7 @@ yields['llt']['obs'] = megacard.get_obs('llt*')
 yields['ltt']['wz'] = megacard.get_rate('ltt*', 'wz')
 yields['ltt']['zz'] = megacard.get_rate('ltt*', 'zz')
 yields['ltt']['fakes'] = megacard.get_rate('ltt*', 'fakes')
-yields['ltt']['VH'] = megacard.get_rate('ltt*', 'VH')
+yields['ltt']['VH'] = megacard.get_rate('ltt*', 'WH')
 yields['ltt']['VHww'] = 0
 yields['ltt']['total'] = (
     yields['ltt']['wz'] + yields['ltt']['zz'] + yields['ltt']['fakes'])

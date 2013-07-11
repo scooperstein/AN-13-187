@@ -41,7 +41,7 @@ All the tricks to build the results are contained in the Makefile.  The
 important commands are:
 
 ```shell
-cd HIG-12-053
+cd AN-13-187
 
 # Run the post fit and make all the final mass distribution plots
 make massplots
