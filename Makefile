@@ -49,9 +49,21 @@ $(SETUP)/vhtt.inputs-sm-8TeV.root: $(COLLECT)/vhtt_llt.inputs-sm-8TeV.root $(COL
 $(SETUP)/vhtt.inputs-sm-7TeV.root: $(COLLECT)/vhtt_llt.inputs-sm-7TeV.root $(COLLECT)/vhtt_llLL.inputs-sm-7TeV.root $(COLLECT)/vhtt_ltt.inputs-sm-7TeV.root
 	hadd -f $@ $^
 
-SHAPEFILE7=$(SETUP)/vhtt.inputs-sm-7TeV.root 
-SHAPEFILE8=$(SETUP)/vhtt.inputs-sm-8TeV.root 
+SHAPEFILE7=$(SETUP)/vhtt.inputs-sm-7TeV.root
+SHAPEFILE8=$(SETUP)/vhtt.inputs-sm-8TeV.root
+#SHAPEFILE8=$(SETUP)/vhtt.inputs-sm-8TeV_scaled.root
 
+## scale to 13 TeV and 300/fb
+scale_to_13TeV: $(SHAPEFILE8)
+	scaleTo13TeV.py -i $(SHAPEFILE8) -o $(SHAPEFILE8)_scaled \
+	ZH=ZH_htt110,ZH_htt115,ZH_htt120,ZH_htt125,ZH_htt130,ZH_htt135,ZH_htt140,\
+	ZH_hww110,ZH_hww115,ZH_hww120,ZH_hww125,ZH_hww130,ZH_hww135,ZH_hww140, Z=Zjets ZZ=ZZ,zz,GGToZZ2L2L WZ=wz WH=WH110,\
+	WH115,WH120,WH125,WH130,WH135,WH140,WH145,WH150,WH155,WH160,WH_hww110,WH_hww115,WH_hww120,WH_hww125,WH_hww130,\
+	WH_hww135,WH_hww140,WH_hww145,WH_hww150,WH_hww155,WH_hww160
+	mv $(SHAPEFILE8)_scaled $(SHAPEFILE8)
+	cd $(SETUP)/.. && ./scale-lumi.py --channels=vhtt 20 300 
+	#$(SETUP)/../scale-lumi.py --channels=vhtt 20 300
+	scale-uncerts.py --scale=0.258 $(CARDS)/vhtt*8TeV*.txt
 
 ################################################################################
 #####  Recipes for building EMT and MMT cards ##################################
@@ -70,7 +82,7 @@ $(CARDS)/.llt7_timestamp: $(SHAPEFILE7) $(LLT_CONFIGS7)
 	rm -f $@
 	# change to base, run the setup command, and touch the .timestamp if 
 	# successful
-	cd $(BASE) && setup-datacards.py -p 7TeV --a sm 110-145:5 -c vhtt --sm-categories-vhtt "0 1 2" && touch $@
+	cd $(BASE) && setup-datacards.py -p 7TeV --a sm 110-145:5 -c vhtt --sm-categories-vhtt "0 1 2 3 4 5 6 7 8" && touch $@
 
 $(CARDS)/.llt8_timestamp: $(SHAPEFILE8) $(LLT_CONFIGS8)
 	@echo "Recipes for building EET, EMT and MMT cards 8TeV"
@@ -78,7 +90,7 @@ $(CARDS)/.llt8_timestamp: $(SHAPEFILE8) $(LLT_CONFIGS8)
 	rm -f $(CARDS)/vhtt_1_8TeV*
 	rm -f $(CARDS)/vhtt_2_8TeV*
 	rm -f $@
-	cd $(BASE) && setup-datacards.py -p 8TeV --a sm 110-145:5 -c vhtt --sm-categories-vhtt "0 1 2" && touch $@
+	cd $(BASE) && setup-datacards.py -p 8TeV --a sm 110-145:5 -c vhtt --sm-categories-vhtt "0 1 2 3 4 5 6 7 8" && touch $@
 
 #llt: $(CARDS)/.llt7_timestamp $(CARDS)/.llt8_timestamp
 llt: $(CARDS)/.llt8_timestamp
@@ -133,8 +145,8 @@ $(CARDS)/.ltt8_timestamp: $(SHAPEFILE8) $(LTT_CONFIGS8)
 #ltt: $(CARDS)/.ltt7_timestamp $(CARDS)/.ltt8_timestamp
 ltt: $(CARDS)/.ltt8_timestamp
 
-cards: zh ltt llt
-#cards: zh ltt
+cards: scale_to_13TeV zh ltt llt
+#cards: zh ltt llt
 
 ################################################################################
 #####  Recipes for generating the limit combo directory ########################
@@ -363,4 +375,4 @@ clean:
 	rm -rf $(LIMITDIR)
 	rm -rf $(SETUP)/*.root
 
-.PHONY: cards zh ltt llt limitdir pulls postfit massplots limits comparemacro plotlimits clean
+.PHONY: cards scale_to_13TeV zh ltt llt limitdir pulls postfit massplots limits comparemacro plotlimits clean
